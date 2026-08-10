@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理后台登录 - 城市总直通车</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #f5f7f6;
+      color: #1a1a1a;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-card {
+      background: #ffffff;
+      border-radius: 18px;
+      max-width: 420px;
+      width: 100%;
+      padding: 42px 36px 36px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .login-title {
+      font-family: "Noto Serif SC", "Songti SC", "SimSun", serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f2e22;
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 14.5px;
+      font-weight: 600;
+      color: #0f2e22;
+      margin-bottom: 8px;
+    }
+
+    input[type="tel"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      background: #f5f7f6;
+      font-size: 15px;
+      color: #1a1a1a;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input[type="tel"]::placeholder,
+    input[type="password"]::placeholder {
+      color: #95a39d;
+    }
+
+    input[type="tel"]:focus,
+    input[type="password"]:focus {
+      border-color: #0f4c39;
+      box-shadow: 0 0 0 3px rgba(15, 76, 57, 0.08);
+      background: #ffffff;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px 20px;
+      margin-top: 10px;
+      background: #0f4c39;
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .login-btn:hover {
+      background: #15684d;
+      transform: translateY(-1px);
+    }
+
+    .login-btn:active {
+      transform: translateY(0);
+    }
+
+    .hint {
+      margin-top: 18px;
+      font-size: 13px;
+      color: #95a39d;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 32px 24px 28px;
+      }
+
+      .login-title {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <h1 class="login-title">管理后台登录</h1>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="phone">手机号</label>
+        <input type="tel" id="phone" name="phone" placeholder="请输入手机号" maxlength="11" required>
+      </div>
+      <div class="form-group">
+        <label for="password">密码</label>
+        <input type="password" id="password" name="password" placeholder="请输入密码" required>
+      </div>
+      <button type="submit" class="login-btn">登录</button>
+    </form>
+    <p class="hint">仅授权手机号可进入管理后台</p>
+  </div>
+
+  <script>
+    const ALLOWED_USERS = {
+      "13811580110": "BEIke123",
+      "13705216205": "BEIke123",
+      "13685130057": "BEIke123"
+    };
+
+    document.getElementById("loginForm").addEventListener("submit", function (event) {
+      event.preventDefault();
+      const phone = document.getElementById("phone").value.trim();
+      const password = document.getElementById("password").value;
+      if (ALLOWED_USERS[phone] && ALLOWED_USERS[phone] === password) {
+        localStorage.setItem("adminUser", JSON.stringify({ phone: phone, loginAt: new Date().toISOString() }));
+        window.location.href = "./admin.html";
+      } else {
+        alert("抱歉，您没有管理权限");
+      }
+    });
+  </script>
+</body>
+</html>

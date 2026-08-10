@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>城市总直通车 · 管理后台</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #f5f7f6;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+
+    .header {
+      background: #0f4c39;
+      color: #ffffff;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-brand h1 {
+      font-family: "Noto Serif SC", "Songti SC", "SimSun", serif;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .header-brand p {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.75);
+      margin-top: 2px;
+    }
+
+    .logout-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 7px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 9999px;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 13px;
+      text-decoration: none;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+    }
+
+    .logout-btn svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 20px 60px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
+      margin-bottom: 24px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f2e22;
+    }
+
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 7px 14px;
+      border: 1px solid #dbe3df;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #0f4c39;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .download-btn:hover {
+      background: #f5f7f6;
+      border-color: #0f4c39;
+    }
+
+    .download-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      min-width: 780px;
+    }
+
+    thead th {
+      text-align: left;
+      font-weight: 500;
+      color: #5a6b64;
+      padding: 12px 10px;
+      border-bottom: 1px solid #eef2f0;
+      white-space: nowrap;
+    }
+
+    tbody td {
+      padding: 14px 10px;
+      border-bottom: 1px solid #f4f6f5;
+      color: #1a1a1a;
+      vertical-align: middle;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .cell-time {
+      white-space: nowrap;
+      color: #5a6b64;
+    }
+
+    .cell-content {
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 12.5px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .badge-green {
+      background: #e6f4ef;
+      color: #0f4c39;
+    }
+
+    .badge-orange {
+      background: #fff3e6;
+      color: #d46b08;
+    }
+
+    .badge-yellow {
+      background: #fffbe6;
+      color: #b48900;
+    }
+
+    .ops {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .ops select {
+      padding: 6px 22px 6px 10px;
+      border: 1px solid #dbe3df;
+      border-radius: 8px;
+      background: #ffffff;
+      font-size: 13px;
+      color: #0f2e22;
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235a6b64' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 6px center;
+    }
+
+    .ops select:focus {
+      border-color: #0f4c39;
+    }
+
+    .detail-btn {
+      padding: 6px 12px;
+      border: 1px solid #dbe3df;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #5a6b64;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .detail-btn:hover {
+      border-color: #0f4c39;
+      color: #0f4c39;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #95a39d;
+      font-size: 14px;
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 320px;
+    }
+
+    .chart-fallback {
+      display: none;
+      text-align: center;
+      padding: 40px;
+      color: #95a39d;
+    }
+
+    /* modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+      z-index: 100;
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-box {
+      background: #ffffff;
+      border-radius: 16px;
+      max-width: 520px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 28px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      transform: translateY(10px);
+      transition: transform 0.2s ease;
+    }
+
+    .modal-overlay.show .modal-box {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0f2e22;
+    }
+
+    .modal-close {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: #f5f7f6;
+      border-radius: 50%;
+      color: #5a6b64;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      background: #eef2f0;
+      color: #0f2e22;
+    }
+
+    .detail-row {
+      margin-bottom: 16px;
+    }
+
+    .detail-label {
+      font-size: 13px;
+      color: #95a39d;
+      margin-bottom: 5px;
+    }
+
+    .detail-value {
+      font-size: 14.5px;
+      color: #1a1a1a;
+      line-height: 1.6;
+      word-break: break-word;
+    }
+
+    .remarks-list {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+
+    .remark-item {
+      background: #f5f7f6;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+    }
+
+    .remark-time {
+      font-size: 12px;
+      color: #95a39d;
+      margin-bottom: 4px;
+    }
+
+    .remark-text {
+      font-size: 14px;
+      color: #1a1a1a;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .remark-empty {
+      font-size: 13px;
+      color: #95a39d;
+      margin-bottom: 10px;
+    }
+
+    .remark-input {
+      width: 100%;
+      min-height: 72px;
+      padding: 10px 12px;
+      border: 1px solid #dbe3df;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #1a1a1a;
+      outline: none;
+      resize: vertical;
+      font-family: inherit;
+      margin-bottom: 10px;
+    }
+
+    .remark-input:focus {
+      border-color: #0f4c39;
+    }
+
+    .remark-save {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      background: #0f4c39;
+      color: #ffffff;
+      font-size: 13.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .remark-save:hover {
+      background: #15684d;
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        padding: 14px 16px;
+      }
+
+      .header-brand h1 {
+        font-size: 17px;
+      }
+
+      .header-brand p {
+        font-size: 12px;
+      }
+
+      .main {
+        padding: 20px 16px 40px;
+      }
+
+      .card {
+        padding: 18px;
+        border-radius: 14px;
+      }
+
+      .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .chart-wrap {
+        height: 260px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-brand">
+      <h1>城市总直通车 · 管理后台</h1>
+      <p id="userInfo">加载中…</p>
+    </div>
+    <a href="./index.html" class="logout-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      返回首页
+    </a>
+    <button class="logout-btn" onclick="logout()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+        <polyline points="16 17 21 12 16 7"></polyline>
+        <line x1="21" y1="12" x2="9" y2="12"></line>
+      </svg>
+      退出登录
+    </button>
+  </header>
+
+  <main class="main">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">反馈明细</div>
+        <button class="download-btn" onclick="downloadCSV()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          下载明细
+        </button>
+      </div>
+      <div class="table-wrap" id="tableContainer">
+        <table>
+          <thead>
+            <tr>
+              <th>反馈时间</th>
+              <th>所属大区</th>
+              <th>涉及门店 / 人员</th>
+              <th>问题内容</th>
+              <th>是否已反馈</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="recordsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">各大区反馈量月度走势</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="trendChart"></canvas>
+      </div>
+      <div class="chart-fallback" id="chartFallback">图表库加载失败，请检查网络后刷新页面</div>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="detailModal" onclick="closeModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title">反馈详情</div>
+        <button class="modal-close" onclick="closeModalDirect()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div id="detailContent"></div>
+    </div>
+  </div>
+
+  <script>
+    const REGIONS = ["城北大区", "东南大区", "西南大区", "环徐大区"];
+    const REGION_COLORS = {
+      "城北大区": "#0f4c39",
+      "东南大区": "#2e8b78",
+      "西南大区": "#e6a23c",
+      "环徐大区": "#8e44ad"
+    };
+
+    const STORAGE_KEY = "feedbackRecords";
+    const USER_KEY = "adminUser";
+
+    const user = JSON.parse(localStorage.getItem(USER_KEY) || "null");
+    if (!user || !user.phone) {
+      window.location.href = "./admin-login.html";
+    } else {
+      document.getElementById("userInfo").textContent = "管理员（" + user.phone + "）";
+    }
+
+    function logout() {
+      localStorage.removeItem(USER_KEY);
+      window.location.href = "./admin-login.html";
+    }
+
+    function getRecords() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    }
+
+    function saveRecords(list) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      render();
+    }
+
+    function seedSampleData() {
+      const list = getRecords();
+      if (list.length === 0) {
+        const samples = [
+          {
+            id: "sample-1",
+            time: "2026-08-03T19:43:12.000Z",
+            region: "城北大区",
+            storeOrPerson: "44",
+            content: "44",
+            isFeedback: "已反馈",
+            handleStatus: "已处理"
+          },
+          {
+            id: "sample-2",
+            time: "2026-08-03T19:27:41.000Z",
+            region: "西南大区",
+            storeOrPerson: "89",
+            content: "好看花见花开",
+            isFeedback: "待反馈",
+            handleStatus: "未处理"
+          }
+        ];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(samples));
+      }
+    }
+
+    function formatTime(iso) {
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return iso;
+      return d.toLocaleString("zh-CN", { hour12: false });
+    }
+
+    function getBadge(isFeedback, handleStatus) {
+      if (isFeedback === "已反馈" && handleStatus === "已处理") {
+        return '<span class="badge badge-green">已反馈已处理</span>';
+      }
+      if (isFeedback === "已反馈" && handleStatus !== "已处理") {
+        return '<span class="badge badge-yellow">已反馈未处理</span>';
+      }
+      return '<span class="badge badge-orange">待反馈</span>';
+    }
+
+    function render() {
+      const tbody = document.getElementById("recordsTable");
+      const records = getRecords();
+      if (records.length === 0) {
+        document.getElementById("tableContainer").innerHTML = '<div class="empty-state">暂无反馈数据</div>';
+        renderChart(records);
+        return;
+      }
+
+      tbody.innerHTML = records.map(item => `
+        <tr>
+          <td class="cell-time">${formatTime(item.time)}</td>
+          <td>${item.region}</td>
+          <td>${escapeHtml(item.storeOrPerson)}</td>
+          <td class="cell-content" title="${escapeHtml(item.content)}">${escapeHtml(item.content)}</td>
+          <td>${getBadge(item.isFeedback, item.handleStatus)}</td>
+          <td>
+            <div class="ops">
+              <select onchange="updateField('${item.id}', 'region', this.value)">
+                ${REGIONS.map(r => `<option value="${r}" ${item.region === r ? "selected" : ""}>${r}</option>`).join("")}
+              </select>
+              <select onchange="updateField('${item.id}', 'isFeedback', this.value)">
+                <option value="已反馈" ${item.isFeedback === "已反馈" ? "selected" : ""}>已反馈</option>
+                <option value="待反馈" ${item.isFeedback === "待反馈" ? "selected" : ""}>待反馈</option>
+              </select>
+              <select onchange="updateField('${item.id}', 'handleStatus', this.value)">
+                <option value="已处理" ${item.handleStatus === "已处理" ? "selected" : ""}>已处理</option>
+                <option value="未处理" ${item.handleStatus === "未处理" ? "selected" : ""}>未处理</option>
+              </select>
+              <button class="detail-btn" onclick="showDetail('${item.id}')">查看详情</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+
+      renderChart(records);
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function updateField(id, field, value) {
+      const list = getRecords();
+      const idx = list.findIndex(r => r.id === id);
+      if (idx === -1) return;
+      list[idx][field] = value;
+      saveRecords(list);
+    }
+
+    function showDetail(id) {
+      const item = getRecords().find(r => r.id === id);
+      if (!item) return;
+      const remarks = item.remarks || [];
+      const remarkHtml = remarks.length
+        ? remarks.map(r => `<div class="remark-item"><div class="remark-time">${formatTime(r.time)}</div><div class="remark-text">${escapeHtml(r.text).replace(/\n/g, "<br>")}</div></div>`).join("")
+        : '<div class="remark-empty">暂无备注</div>';
+      document.getElementById("detailContent").innerHTML = `
+        <div class="detail-row"><div class="detail-label">反馈时间</div><div class="detail-value">${formatTime(item.time)}</div></div>
+        <div class="detail-row"><div class="detail-label">所属大区</div><div class="detail-value">${escapeHtml(item.region)}</div></div>
+        <div class="detail-row"><div class="detail-label">涉及门店 / 人员</div><div class="detail-value">${escapeHtml(item.storeOrPerson)}</div></div>
+        <div class="detail-row"><div class="detail-label">反馈状态</div><div class="detail-value">${getBadge(item.isFeedback, item.handleStatus)}</div></div>
+        <div class="detail-row"><div class="detail-label">问题内容</div><div class="detail-value">${escapeHtml(item.content).replace(/\n/g, "<br>")}</div></div>
+        <div class="detail-row">
+          <div class="detail-label">备注跟进</div>
+          <div class="remarks-list">${remarkHtml}</div>
+          <textarea id="remarkInput" class="remark-input" placeholder="输入跟进备注，随时记录处理进展…"></textarea>
+          <button class="remark-save" onclick="saveRemark('${item.id}')">保存备注</button>
+        </div>
+      `;
+      document.getElementById("detailModal").classList.add("show");
+    }
+
+    function saveRemark(id) {
+      const input = document.getElementById("remarkInput");
+      const text = input.value.trim();
+      if (!text) {
+        alert("请输入备注内容");
+        return;
+      }
+      const list = getRecords();
+      const idx = list.findIndex(r => r.id === id);
+      if (idx === -1) return;
+      if (!list[idx].remarks) list[idx].remarks = [];
+      list[idx].remarks.push({ time: new Date().toISOString(), text: text });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      showDetail(id);
+    }
+
+    function closeModal(event) {
+      if (event.target === document.getElementById("detailModal")) {
+        document.getElementById("detailModal").classList.remove("show");
+      }
+    }
+
+    function closeModalDirect() {
+      document.getElementById("detailModal").classList.remove("show");
+    }
+
+    function downloadCSV() {
+      const records = getRecords();
+      if (records.length === 0) {
+        alert("暂无数据可下载");
+        return;
+      }
+      const headers = ["反馈时间", "所属大区", "涉及门店/人员", "问题内容", "是否已反馈", "处理状态"];
+      const rows = records.map(r => [
+        formatTime(r.time),
+        r.region,
+        r.storeOrPerson,
+        r.content,
+        r.isFeedback,
+        r.handleStatus
+      ]);
+      const csv = [headers, ...rows].map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(",")).join("\r\n");
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "反馈明细_" + new Date().toISOString().slice(0, 10) + ".csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    let chartInstance = null;
+
+    function renderChart(records) {
+      if (typeof Chart === "undefined") {
+        document.querySelector(".chart-wrap").style.display = "none";
+        document.getElementById("chartFallback").style.display = "block";
+        return;
+      }
+
+      const monthSet = new Set();
+      records.forEach(r => {
+        const d = new Date(r.time);
+        if (!isNaN(d.getTime())) {
+          monthSet.add(d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"));
+        }
+      });
+      const labels = Array.from(monthSet).sort();
+      if (labels.length === 0) labels.push(new Date().getFullYear() + "-" + String(new Date().getMonth() + 1).padStart(2, "0"));
+
+      const datasets = REGIONS.map(region => ({
+        label: region,
+        data: labels.map(month => {
+          return records.filter(r => {
+            const d = new Date(r.time);
+            return r.region === region && !isNaN(d.getTime()) && (d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0")) === month;
+          }).length;
+        }),
+        borderColor: REGION_COLORS[region],
+        backgroundColor: REGION_COLORS[region],
+        tension: 0.3,
+        pointRadius: 4,
+        pointHoverRadius: 6
+      }));
+
+      const ctx = document.getElementById("trendChart").getContext("2d");
+      if (chartInstance) chartInstance.destroy();
+      chartInstance = new Chart(ctx, {
+        type: "line",
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: "bottom", labels: { usePointStyle: true, padding: 20 } }
+          },
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1 } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    seedSampleData();
+    render();
+  </script>
+</body>
+</html>
