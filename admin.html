@@ -230,6 +230,23 @@
       color: #0f4c39;
     }
 
+    .delete-btn {
+      padding: 6px 12px;
+      border: 1px solid #f3c5c5;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #d23b3b;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .delete-btn:hover {
+      border-color: #d23b3b;
+      background: #fdeaea;
+      color: #b32b2b;
+    }
+
     .empty-state {
       text-align: center;
       padding: 40px 20px;
@@ -619,6 +636,7 @@
                 <option value="未处理" ${item.handleStatus === "未处理" ? "selected" : ""}>未处理</option>
               </select>
               <button class="detail-btn" onclick="showDetail('${item.id}')">查看详情</button>
+              <button class="delete-btn" onclick="deleteRecord('${item.id}')">删除</button>
             </div>
           </td>
         </tr>
@@ -639,6 +657,15 @@
       if (idx === -1) return;
       list[idx][field] = value;
       saveRecords(list);
+    }
+
+    function deleteRecord(id) {
+      if (!confirm("确定要删除这条反馈记录吗？此操作不可撤销。")) {
+        return;
+      }
+      const list = getRecords();
+      const newList = list.filter(r => r.id !== id);
+      saveRecords(newList);
     }
 
     function showDetail(id) {
